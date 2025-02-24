@@ -2,7 +2,7 @@ import json
 import paho.mqtt.client as mqtt
 
 # Configuration for MQTT
-MQTT_BROKER = 'broker.hivemq.com'
+MQTT_BROKER = '172.31.19.135'
 MQTT_PORT = 1883
 MQTT_TOPIC = 'tankAutomation/data'
 

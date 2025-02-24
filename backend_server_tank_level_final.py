@@ -6,20 +6,21 @@ from io import StringIO
 import csv
 
 # Configuration for IMAP email
-IMAP_SERVER = 'YOUR EMAIL SERVER' # To be changed as per your actual data
-EMAIL_USER = 'YOUR EMAIL ID' # To be changed as per your actual data
-EMAIL_PASSWORD = 'YOUR PASSWORD' # To be changed as per your actual data
+IMAP_SERVER = 'imap.fatcow.com' # To be changed as per your actual data
+EMAIL_USER = 'fuel@handytl.com' # To be changed as per your actual data
+EMAIL_PASSWORD = 'HandY@1234' # To be changed as per your actual data
 EMAIL_FOLDER = 'INBOX'
 
 # Configuration for MQTT
-MQTT_BROKER = 'MQTT BROKER NAME' # To be changed as per your actual data
+MQTT_BROKER = '159.89.243.74' # To be changed as per your actual data
 MQTT_PORT = 1883
 DEFAULT_MQTT_TOPIC = 'tankAutomation/data'
 
 # Email filtering criteria
-EXPECTED_SENDER = "Sender email id" # To be changed as per your actual data
-REQUIRED_SUBJECT_KEYWORD = "Tank Data" # Can be changed as per your actual data if required
-REQUIRED_BODY_TOKEN = "TANK9999" # Can be changed as per your actual data if required
+EXPECTED_SENDER = "info@zyntellitech.com" # To be changed as per your actual data
+REQUIRED_SUBJECT_KEYWORD = "FuelTankReports" # Can be changed as per your actual data if required
+REQUIRED_BODY_TOKEN = "29fcf1f1-dff9-485c-997c-00e5a81542df" #system-uuid - get sudo dmidecode -s system-uuid
+
 
 # Connect to the email server
 def connect_to_email():
@@ -150,7 +151,7 @@ def on_publish(client, userdata, mid):
 def main():
     try:
         # Connect to MQTT broker
-        client = mqtt.Client()
+        client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION1)
         client.on_connect = on_connect
         client.on_publish = on_publish
         client.connect(MQTT_BROKER, MQTT_PORT, 60)

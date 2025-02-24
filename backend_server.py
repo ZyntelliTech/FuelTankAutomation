@@ -8,20 +8,20 @@ from io import StringIO
 from datetime import datetime
 
 # Configuration for IMAP email
-IMAP_SERVER = 'yourmailserv.com' # please provide your mail server
-EMAIL_USER = 'youremailid@xyz.com' # please provide your mail id
-EMAIL_PASSWORD = 'your Password' # your email password
+IMAP_SERVER = 'imap.fatcow.com' # please provide your mail server
+EMAIL_USER = 'fuel@handytl.com' # please provide your mail id
+EMAIL_PASSWORD = 'HandY@1234' # your email password
 EMAIL_FOLDER = 'INBOX'
 
 # Configuration for MQTT
-MQTT_BROKER = 'broker.hivemq.com' # used hiveq for testing, please use the actual broker id
+MQTT_BROKER = '159.89.243.74' # used hiveq for testing, please use the actual broker id
 MQTT_PORT = 1883
 DEFAULT_MQTT_TOPIC = 'tankAutomation/data'
 
 # Email filtering criteria
-EXPECTED_SENDER = "sender email id @xyz.com" #please provide the sender email id
-REQUIRED_SUBJECT_KEYWORD = "Tank Data" # example criteria for subject, please replace with actual subject
-REQUIRED_BODY_TOKEN = "TANK9999" # example token in body, please replace with actual token
+EXPECTED_SENDER = "jamesrose0993@gmail.com" #please provide the sender email id
+REQUIRED_SUBJECT_KEYWORD = "FuelTankAutomation" # example criteria for subject, please replace with actual subject
+REQUIRED_BODY_TOKEN = "Tank Data Report" # example token in body, please replace with actual token
 
 # Connect to the email server
 def connect_to_email():
