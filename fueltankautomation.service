@@ -1,0 +1,12 @@
+[Unit]
+Description=Get Level From Fuel Tanks
+After=network.target
+
+[Service]
+Type=idle
+Restart=on-failure
+User=root
+ExecStart=/usr/bin/python3 /root/FuelTankAutomation/backend_server_tank_level_final.py
+
+[Install]
+WantedBy=multi-user.target

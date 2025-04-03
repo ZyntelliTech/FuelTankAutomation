@@ -19,7 +19,7 @@ DEFAULT_MQTT_TOPIC = 'tankAutomation/data'
 # Email filtering criteria
 EXPECTED_SENDER = "bryce@handytruckline.com" # To be changed as per your actual data
 REQUIRED_SUBJECT_KEYWORD = "Tank Status - Handy Truck Line, Inc." # Can be changed as per your actual data if required
-REQUIRED_BODY_TOKEN = "Status update for Tanks at Site: Handy Truck Line, Inc." #system-uuid - get sudo dmidecode -s system-uuid
+REQUIRED_BODY_TOKEN = "Status update for Tanks at Site: *Handy Truck Line, Inc.*" #system-uuid - get sudo dmidecode -s system-uuid
 
 
 # Connect to the email server
