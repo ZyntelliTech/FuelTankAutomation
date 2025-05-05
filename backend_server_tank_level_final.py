@@ -12,14 +12,14 @@ EMAIL_PASSWORD = 'HandY@1234' # To be changed as per your actual data
 EMAIL_FOLDER = 'INBOX'
 
 # Configuration for MQTT
-MQTT_BROKER = '159.89.243.74' # To be changed as per your actual data
+MQTT_BROKER = '138.197.96.104' # To be changed as per your actual data
 MQTT_PORT = 1883
-DEFAULT_MQTT_TOPIC = 'tankAutomation/data'
+DefaultTopic = 'tankAutomation/data'
 
 # Email filtering criteria
-EXPECTED_SENDER = "bryce@handytruckline.com" # To be changed as per your actual data
-REQUIRED_SUBJECT_KEYWORD = "Tank Status - Handy Truck Line, Inc." # Can be changed as per your actual data if required
-REQUIRED_BODY_TOKEN = "Status update for Tanks at Site: *Handy Truck Line, Inc.*" #system-uuid - get sudo dmidecode -s system-uuid
+EXPECTED_SENDER = "noreply@fmtdata.com" # To be changed as per your actual data
+REQUIRED_SUBJECT_KEYWORD = "Tank Status" # Can be changed as per your actual data if required
+REQUIRED_BODY_TOKEN = "Status update for tank" #system-uuid - get sudo dmidecode -s system-uuid
 
 
 # Connect to the email server
@@ -177,7 +177,7 @@ def main():
                         csv_data = extract_csv_attachment(msg)
                         if csv_data:
                             data = parse_csv_data(csv_data)
-                            send_data_to_mqtt(client, 'tankAutomation/data', data)
+                            send_data_to_mqtt(client, DefaultTopic, data)
                     else:
                         print("Email is ignored as it doesn't match the criteria.")
                 else:
