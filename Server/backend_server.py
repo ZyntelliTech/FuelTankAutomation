@@ -1,0 +1,166 @@
+import imaplib
+import email
+import time
+import csv
+import json
+import paho.mqtt.client as mqtt
+from io import StringIO
+from datetime import datetime
+
+# Configuration for IMAP email
+IMAP_SERVER = 'imap.fatcow.com' # please provide your mail server
+EMAIL_USER = 'fuel@handytl.com' # please provide your mail id
+EMAIL_PASSWORD = 'HandY@1234' # your email password
+EMAIL_FOLDER = 'INBOX'
+
+# Configuration for MQTT
+MQTT_BROKER = '159.89.243.74' # used hiveq for testing, please use the actual broker id
+MQTT_PORT = 1883
+DEFAULT_MQTT_TOPIC = 'tankAutomation/data'
+
+# Email filtering criteria
+EXPECTED_SENDER = "jamesrose0993@gmail.com" #please provide the sender email id
+REQUIRED_SUBJECT_KEYWORD = "FuelTankAutomation" # example criteria for subject, please replace with actual subject
+REQUIRED_BODY_TOKEN = "Tank Data Report" # example token in body, please replace with actual token
+
+# Connect to the email server
+def connect_to_email():
+    try:
+        mail = imaplib.IMAP4_SSL(IMAP_SERVER)
+        mail.login(EMAIL_USER, EMAIL_PASSWORD)
+        return mail
+    except Exception as e:
+        print(f"Error connecting to email: {e}")
+        raise
+
+# Check for new emails
+def fetch_latest_email(mail):
+    try:
+        mail.select(EMAIL_FOLDER)
+        status, messages = mail.search(None, 'UNSEEN')
+        email_ids = messages[0].split()
+        if not email_ids:
+            return None
+        latest_email_id = email_ids[-1]
+        _, data = mail.fetch(latest_email_id, '(RFC822)')
+        raw_email = data[0][1]
+        return email.message_from_bytes(raw_email)
+    except Exception as e:
+        print(f"Error fetching emails: {e}")
+        return None
+
+# Extract the sender, subject, and body from the email
+def extract_email_data(msg):
+    sender = msg.get('From')
+    subject = msg.get('Subject')
+    body = ""
+    if msg.is_multipart():
+        for part in msg.walk():
+            content_type = part.get_content_type()
+            content_disposition = str(part.get("Content-Disposition"))
+            if "attachment" not in content_disposition and content_type == "text/plain":
+                body += part.get_payload(decode=True).decode()
+    else:
+        body = msg.get_payload(decode=True).decode()
+    return sender, subject, body
+
+# Extract the attachment and save CSV data
+def extract_csv_attachment(msg):
+    for part in msg.walk():
+        if part.get_content_maintype() == 'multipart':
+            continue
+        if part.get('Content-Disposition') is None:
+            continue
+        if 'attachment' in part.get('Content-Disposition'):
+            filename = part.get_filename()
+            if filename.lower().endswith('.csv'):
+                return part.get_payload(decode=True).decode()  # Return decoded CSV content
+    return None
+
+# Parse the CSV data into a list of dictionaries
+def parse_csv_data(csv_data):
+    csv_file = StringIO(csv_data)
+    csv_reader = csv.DictReader(csv_file)
+    return [row for row in csv_reader]
+
+# Validate email against the criteria
+def is_valid_email(sender, subject, body):
+    return EXPECTED_SENDER in sender and REQUIRED_SUBJECT_KEYWORD in subject and REQUIRED_BODY_TOKEN in body
+
+# MQTT Client setup to send data to PLC
+def send_data_to_mqtt(client, topic, data):
+    try:
+        # Create a payload with a single JSON object
+        if isinstance(data, list):
+            payload = {
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Add timestamp
+                "data": data  # Attach the list of data rows
+            }
+            # Convert to JSON
+            payload_json = json.dumps(payload)
+            result = client.publish(topic, payload=payload_json, qos=1, retain=False)
+            if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                print(f"Successfully published: {payload_json}")
+            else:
+                print(f"Failed to publish message: {result.rc}")
+        else:
+            print("Data is not in the expected format (list of dictionaries).")
+    except Exception as e:
+        print(f"Error sending data to MQTT: {e}")
+
+# MQTT Connection callback
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT Broker!")
+    else:
+        print(f"Failed to connect, return code {rc}")
+
+# MQTT Publish callback
+def on_publish(client, userdata, mid):
+    print(f"Message {mid} has been published.")
+
+# Main function
+def main():
+    try:
+        # Connect to MQTT broker
+        client = mqtt.Client()
+        client.on_connect = on_connect
+        client.on_publish = on_publish
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
+        client.loop_start()  # Start MQTT loop in a background thread
+
+        # Connect to email
+        mail = connect_to_email()
+
+        while True:
+            try:
+                print("Checking for new emails...")
+                msg = fetch_latest_email(mail)
+                if msg:
+                    print("New email received!")
+                    sender, subject, body = extract_email_data(msg)
+                    print(f"Sender: {sender}")
+                    print(f"Subject: {subject}")
+                    print(f"Body: {body}")
+                    if is_valid_email(sender, subject, body):
+                        print("Email is valid. Processing...")
+                        csv_data = extract_csv_attachment(msg)
+                        if csv_data:
+                            data = parse_csv_data(csv_data)
+                            send_data_to_mqtt(client, DEFAULT_MQTT_TOPIC, data)
+                        else:
+                            print("No CSV attachment found.")
+                    else:
+                        print("Email does not meet the criteria. Ignored.")
+                else:
+                    print("No new emails.")
+                time.sleep(30)  # Check emails every 30 seconds
+            except Exception as e:
+                print(f"Error in processing loop: {e}")
+                time.sleep(60)
+
+    except Exception as e:
+        print(f"Fatal error: {e}")
+
+if __name__ == "__main__":
+    main()
