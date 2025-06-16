@@ -1,0 +1,49 @@
+I have a fuel tank farm with 6 Fuel tanks. Each tank will have it's own electric Valve (see below). 
+I need to be able to control these valves with a PLC (see below). I will have an HMI on site (see below), but I also need to be able to control the valves remotely (PLC is wifi compatible)
+
+The valves have a 20 second cycle time. Under most circumstance (except as described when "leveling") I can't ever have 2 valves open at the same time.
+
+I need to be able to switch tanks and keep a log of when tanks were switched.
+
+Before a tank is opened, the current tank needs to be closed.
+The 24V valves have Power to close and Power to open, so all but the open tank should have power to the close side. 
+When a tank is switched the current tank will need power to the closed side and a delay for 25 seconds before power to the open side is given to the new open tank.
+
+Each valve needs to be exercised 1 time per week without "Leveling" the tanks. So let's say Sunday morning at 2:00am the current tank would close, delay 25 seconds, tank 1 would open for 25 seconds, then close for 25 seconds. Tank 2 would open for 25 seconds then close for 25 seconds, etc, then after tank 6 is done the tank that was open before the "exercise" would re-open.
+
+Rarely, but occasionally I need to "level" several tanks. 
+This needs to be password protected (use 1928). ie press "Level" type in password and then select the tanks to be leveled and execute. 
+Tanks would remain open until a new tank selected.
+When a new tank is selected, close all the tanks, delay 25 seconds, then open the selected tank.
+
+
+
+I also get an email every morning with the current tank levels (see attached). 
+I need to be able to show the current tank levels in each tank on the HMI. (Could be a swipe or menu item if the 7" screen is already too congested). 
+I can setup a gmail account for the PLC and when the email arrives, the PLC can update the fuel levels from the email.
+
+
+The tanks at this farm are:
+Paul 1
+Paul 2
+Paul 3 (doesn't have a level gauge yet)
+Paul 4
+Paul 5
+Paul 6
+
+
+
+I have the following hardware:
+
+Click Plus AC Power Supply - C0-01AC
+Click Plus PLC - C2-03CPU-2
+2 Click Plus Modules - C2-14D1
+C-More - CM5-T7W
+6 total Valworx 2" Electric Actuated Stainless Ball Valve 24 VDC
+https://www.valworx.com/product/stainless-ball-valve-2-24-vdc
+
+P.S. The fuel level is emailed to the Click Plus PLC, whick needs to extract the fuel level from the email text.
+
+Mail server:
+fuel@handytl.com
+HandY@1234
